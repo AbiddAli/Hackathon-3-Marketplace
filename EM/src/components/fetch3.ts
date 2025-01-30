@@ -8,6 +8,7 @@ export const fetchPopularProducts1 = async () => {
       price,
       stock,
       slug,
+      description,
       "imageUrl": image.asset->url  // Alias the image URL to imageUrl
     }`;
   

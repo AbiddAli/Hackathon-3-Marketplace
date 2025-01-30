@@ -1,10 +1,10 @@
-// "use client"
+// "use client";
 // import { GiSofa } from "react-icons/gi";
 // import { FaCartShopping } from "react-icons/fa6";
 // import { useState, useEffect, useRef } from "react";
 // import Link from "next/link";
 // import { useCart } from "@/app/context/cardContext"; // Adjust the path as needed
-// import { client } from "../../../sanity/lib/client"; // Import Sanity client
+// import { client } from "@/sanity/lib/client"; // Import Sanity client
 // import { FaTimes } from "react-icons/fa"; // Import cross icon
 
 // // Define an interface for the product
@@ -23,7 +23,7 @@
 //   const inputRef = useRef<HTMLInputElement | null>(null); // Reference to input field
   
 //   // States for search
-//   const [searchTerm, setSearchTerm] = useState<string>("");
+//   const [searchTerm, setSearchTerm] = useState<string>(""); 
 //   const [allProducts, setAllProducts] = useState<Product[]>([]); // All products should be an array of Product
 //   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]); // Filtered products should be an array of Product
 
@@ -109,7 +109,7 @@
 //           <h1 className="text-xs sm:text-sm md:text-base lg:text-lg font-semibold">Comforty</h1>
 //         </div>
 //         <div>
-//           <ul className="flex items-center gap-4 sm:gap-6 text-xs sm:text-sm">
+//           <ul className="flex items-center gap-4 sm:gap-6 text-xs sm:text-sm md:text-base">
 //             <li>
 //               <Link href={"/summary"}>
 //                 <FaCartShopping className="w-6 h-6 sm:w-8 sm:h-8 text-emerald-500" />
@@ -128,10 +128,10 @@
 //       </div>
 
 //       {/* Search Bar Section */}
-//       <div className="flex justify-between items-center px-4 sm:px-8 md:px-16 lg:px-40 py-4 gap-4 sm:gap-6">
+//       <div className="flex justify-between items-center px-4 sm:px-8 md:px-16 lg:px-40 py-4 gap-4 sm:gap-6 flex-col sm:flex-row">
 //         {/* Navigation Links */}
-//         <div className="flex flex-col md:flex-row justify-between items-center gap-3">
-//           <ul className="flex gap-6 text-xs sm:text-sm md:text-base text-black items-center relative">
+//         <div className="flex flex-col md:flex-row justify-between items-center gap-3 w-full md:w-auto">
+//           <ul className="flex gap-3 text-xs sm:text-sm md:text-base text-black items-center relative w-full md:w-auto">
 //             <li>
 //               <a href={"/"}>Home</a>
 //             </li>
@@ -149,7 +149,7 @@
 //             </li>
 //             <li className="relative">
 //               {/* Categories Button */}
-//               <button onClick={toggleDropdown} className="flex items-center gap-1 text-black hover:underline">
+//               <button onClick={toggleDropdown} className="flex items-center gap-1 text-black hover:underline text-xs sm:text-sm md:text-base">
 //                 Categories
 //                 <span className="text-xs">&#9660;</span> {/* Down arrow */}
 //               </button>
@@ -175,7 +175,7 @@
 //         </div>
 
 //         {/* Search Bar */}
-//         <div className="relative w-full sm:w-80 md:w-96">
+//         <div className="relative w-full sm:w-80 md:w-96 mt-4 sm:mt-0">
 //           <input
 //             ref={inputRef}
 //             type="text"
@@ -219,7 +219,10 @@
 //   );
 // }
 
+
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
+
 import { GiSofa } from "react-icons/gi";
 import { FaCartShopping } from "react-icons/fa6";
 import { useState, useEffect, useRef } from "react";
@@ -227,7 +230,7 @@ import Link from "next/link";
 import { useCart } from "@/app/context/cardContext"; // Adjust the path as needed
 import { client } from "@/sanity/lib/client"; // Import Sanity client
 import { FaTimes } from "react-icons/fa"; // Import cross icon
-
+import { useRouter } from "next/navigation"; // Import useRouter
 // Define an interface for the product
 interface Product {
   _id: string;
@@ -242,38 +245,65 @@ export default function Navbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false); // State for dropdown
   const dropdownRef = useRef<HTMLUListElement | null>(null); // Reference to dropdown menu
   const inputRef = useRef<HTMLInputElement | null>(null); // Reference to input field
-  
+
+ 
+
+const router = useRouter(); // Initialize router
+
+const handleSearch = (event: React.KeyboardEvent<HTMLInputElement>) => {
+  if (event.key === "Enter" && searchTerm.trim()) {
+    router.push(`/Product?search=${encodeURIComponent(searchTerm.trim())}`);
+    clearSearch();
+  }
+};
+
+
   // States for search
   const [searchTerm, setSearchTerm] = useState<string>(""); 
   const [allProducts, setAllProducts] = useState<Product[]>([]); // All products should be an array of Product
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]); // Filtered products should be an array of Product
+  const [loading, setLoading] = useState<boolean>(false); // State for loading
+  const [error, setError] = useState<string | null>(null); // State for error
 
   // Fetch products from Sanity CMS
   useEffect(() => {
     const fetchProducts = async () => {
-      const products = await client.fetch(`
-        *[_type == "product"] {
-          _id,
-          title,
-          slug
-        }
-      `);
-      setAllProducts(products);
+      try {
+        setLoading(true);
+        const products = await client.fetch(`
+          *[_type == "product"] {
+            _id,
+            title,
+            slug
+          }
+        `);
+        setAllProducts(products);
+        setError(null); // Clear any previous errors
+      } catch (err) {
+        console.error("Error fetching products:", err);
+        setError("Failed to fetch products. Please try again.");
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchProducts();
   }, []);
 
-  // Handle search functionality
+  // Throttle search updates
   useEffect(() => {
-    if (searchTerm) {
-      const filtered = allProducts.filter((product) =>
-        product.title.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setFilteredProducts(filtered);
-    } else {
-      setFilteredProducts([]);
-    }
+    const debounceSearch = setTimeout(() => {
+      if (searchTerm) {
+        const filtered = allProducts.filter((product) =>
+          product.title && product.title.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        setFilteredProducts(filtered);
+      } else {
+        setFilteredProducts([]);
+      }
+    }, 300); // Debounce by 300ms
+
+    return () => clearTimeout(debounceSearch);
   }, [searchTerm, allProducts]);
 
   // Calculate the total number of items in the cart
@@ -305,6 +335,7 @@ export default function Navbar() {
   // Function to clear the search term
   const clearSearch = () => {
     setSearchTerm("");
+    setFilteredProducts([]);
   };
 
   return (
@@ -403,6 +434,7 @@ export default function Navbar() {
             placeholder="Search for products..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={handleSearch}
             className="border border-gray-300 rounded-lg p-2 w-full text-sm focus:outline-none"
             style={{
               backgroundColor: '#fff',
@@ -417,9 +449,13 @@ export default function Navbar() {
               <FaTimes size={16} />
             </div>
           )}
-          {searchTerm && (
+          {/* {searchTerm && (
             <div className="absolute top-10 left-0 bg-white shadow-md p-4 w-full max-h-60 overflow-auto z-10">
-              {filteredProducts.length > 0 ? (
+              {loading ? (
+                <p className="text-gray-500">Loading...</p>
+              ) : error ? (
+                <p className="text-red-500">{error}</p>
+              ) : filteredProducts.length > 0 ? (
                 <ul className="space-y-2">
                   {filteredProducts.map((product) => (
                     <li key={product._id}>
@@ -433,7 +469,7 @@ export default function Navbar() {
                 <p className="text-gray-500">No products found.</p>
               )}
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </div>

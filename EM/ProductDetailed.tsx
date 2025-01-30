@@ -13,6 +13,7 @@ interface Product {
   price: number;
   imageUrl: string;
   stock: number;
+  description: string;
 }
 
 interface ProductDetailsProps {
@@ -74,7 +75,7 @@ export default  function ProductDetails({ product }: ProductDetailsProps) {
           size: "",
           id: `product-${Math.random().toString(36).substr(2, 9)}`,
           isAvailable: false,
-          description: ""
+          description: product.description,
         },
       });
     }
@@ -103,8 +104,9 @@ export default  function ProductDetails({ product }: ProductDetailsProps) {
           {product.price} $ USD
         </button>
         <p className="text-center md:text-left leading-relaxed mb-6">
-          Pour-over craft beer pug drinking vinegar live-edge gastropub, keytar neutra sustainable fingerstache kickstarter.
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptas voluptatum a veritatis pariatur.
+          {product.description}
+          {/* Pour-over craft beer pug drinking vinegar live-edge gastropub, keytar neutra sustainable fingerstache kickstarter.
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptas voluptatum a veritatis pariatur. */}
         </p>
 
         {/* Quantity Selection */}

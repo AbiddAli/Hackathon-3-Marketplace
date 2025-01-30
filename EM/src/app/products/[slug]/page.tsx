@@ -9,6 +9,7 @@ interface Product {
   price: number;
   imageUrl: string;
   stock: number;
+  description: string;
 }
 
 // Define the Page Props interface

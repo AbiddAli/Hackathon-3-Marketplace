@@ -1,10 +1,11 @@
 
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import Image from "next/image";
 import { FaCartShopping } from "react-icons/fa6";
 import { fetchPopularProducts1 } from "../fetch3"; // Import your fetch function
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 // Define the interface for the product
 interface Product {
@@ -17,12 +18,20 @@ interface Product {
   badge: string;
 }
 
-export default function AllProductData() {
+const AllProductData = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true); // Loading state
   const [error, setError] = useState<string | null>(null); // Error state
   const productsPerPage = 6; // Number of products per page
+  const searchParams = useSearchParams();
+  const searchQuery = searchParams.get("search") ? searchParams.get("search")!.toLowerCase() : "";
+
+  const filteredProducts = searchQuery
+    ? products.filter((product) =>
+        product.title.toLowerCase().includes(searchQuery)
+      )
+    : products;
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -47,6 +56,7 @@ export default function AllProductData() {
           const indexB = desiredOrder.indexOf(b.slug.current);
           return indexA - indexB;
         });
+
         setProducts(sortedProducts);
         setError(null);
       }catch {
@@ -60,10 +70,14 @@ export default function AllProductData() {
     fetchProducts();
   }, []);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
   // Pagination logic: Slice products array based on current page
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = products.slice(indexOfFirstProduct, indexOfLastProduct);
+  const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
 
   // Change page
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
@@ -93,6 +107,16 @@ export default function AllProductData() {
     <div className="px-4 sm:px-8 md:px-52 pt-2 mt-14 max-w-screen-2xl m-auto">
       <div>
         <h1 className="text-2xl md:text-3xl font-bold mb-4 pl-4">All Products</h1>
+
+        {searchQuery && (
+        <h2 className="text-center text-lg font-semibold text-gray-600">
+          Showing results for &quot;{searchQuery}&quot;
+        </h2>
+      )}
+
+{filteredProducts.length === 0 ? (
+        <p className="text-center text-red-500 mt-10">No products found.</p>
+      ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-20">
           {currentProducts.map((product) => (
             <div
@@ -105,7 +129,7 @@ export default function AllProductData() {
                   <Image
                     src={product.imageUrl || "/placeholder.png"}
                     alt={product.title || "Product"}
-                    width={400}
+                    width={400} 
                     height={400}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
@@ -132,7 +156,8 @@ export default function AllProductData() {
               </Link>
             </div>
           ))}
-        </div>
+        </div>)}
+
 
         {/* Pagination Controls */}
         <div className="flex justify-center mt-8">
@@ -169,5 +194,12 @@ export default function AllProductData() {
         </div>
       </div>
     </div>
-  );
+  )};
+
+  export default function AllProductDataWithSuspense() {
+    return (
+      <Suspense fallback={<div>Loading...</div>}>
+        <AllProductData />
+      </Suspense>
+    );
 }
