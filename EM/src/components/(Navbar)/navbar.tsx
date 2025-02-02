@@ -231,6 +231,7 @@ import { useCart } from "@/app/context/cardContext"; // Adjust the path as neede
 import { client } from "@/sanity/lib/client"; // Import Sanity client
 import { FaTimes } from "react-icons/fa"; // Import cross icon
 import { useRouter } from "next/navigation"; // Import useRouter
+import { UserButton, SignUpButton, SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 // Define an interface for the product
 interface Product {
   _id: string;
@@ -360,8 +361,11 @@ const handleSearch = (event: React.KeyboardEvent<HTMLInputElement>) => {
           <GiSofa className="text-emerald-500 h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10" />
           <h1 className="text-xs sm:text-sm md:text-base lg:text-lg font-semibold">Comforty</h1>
         </div>
+
+
+        <div className="flex gap-8">
         <div>
-          <ul className="flex items-center gap-4 sm:gap-6 text-xs sm:text-sm md:text-base">
+          <ul className="flex items-center gap-2 sm:gap-2 text-xs sm:text-sm md:text-base">
             <li>
               <Link href={"/summary"}>
                 <FaCartShopping className="w-6 h-6 sm:w-8 sm:h-8 text-emerald-500" />
@@ -376,6 +380,37 @@ const handleSearch = (event: React.KeyboardEvent<HTMLInputElement>) => {
               )}
             </li>
           </ul>
+        </div>
+
+        <div className="flex gap-4">
+
+        <SignedOut>
+          <SignInButton mode="modal">
+            <button className="px-2 py-1 bg-[#10B981] text-white rounded-lg hover:bg-green-700 transition">
+              Sign In
+            </button>
+          </SignInButton>
+
+          <SignUpButton mode="modal">
+            <button className="px-2 py-1 bg-[#0EA5E9] text-white rounded-lg hover:bg-blue-700 transition">
+              Sign Up
+            </button>
+          </SignUpButton>
+        </SignedOut>
+
+        {/* Show User Profile when signed in */}
+        <SignedIn>
+          <UserButton afterSignOutUrl="/" />
+        </SignedIn>
+        {/* <SignedOut>
+            <SignInButton/>
+          </SignedOut>
+          <SignedIn>
+            <UserButton />
+          </SignedIn> */}
+          {/* <button>Sign in</button> */}
+          {/* <button>Sign up</button> */}
+        </div>
         </div>
       </div>
 

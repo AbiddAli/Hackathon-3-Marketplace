@@ -2,7 +2,6 @@
   "name": "fully-functional-website-hackathon-3",
   "version": "0.1.0",
   "private": true,
-  
   "type": "module",
   "scripts": {
     "dev": "next dev",
@@ -13,6 +12,7 @@
     "cleanup": "node scripts/cleanup.mjs"
   },
   "dependencies": {
+    "@clerk/nextjs": "^6.10.6",
     "@hookform/resolvers": "^3.10.0",
     "@sanity/image-url": "^1.1.0",
     "@sanity/vision": "^3.68.3",

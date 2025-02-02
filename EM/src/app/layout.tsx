@@ -5,7 +5,9 @@ import Navbar from "@/components/(Navbar)/navbar";
 import Footer from "@/components/(Landing All Pages)/(Footer)/footer";
 import { CartProvider } from "./context/cardContext";
 import { ToastContainer } from "react-toastify";
-
+import {
+  ClerkProvider,
+  } from '@clerk/nextjs'
 
 
 
@@ -31,11 +33,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+    <ClerkProvider>
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-
+        
 
 <ToastContainer />
 <CartProvider>
@@ -49,5 +52,6 @@ export default function RootLayout({
 
       </body>
     </html>
+    </ClerkProvider>
   );
 }
